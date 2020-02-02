@@ -48,9 +48,16 @@ def populate():
             add_page(c, p['title'], p['url'])
 
     for c in Category.objects.all():
-        add_like(c)
+        set_like(c)
+        count = 1
+        for p in Page.objects.filter():
+            set_view_num(p, count)
+            count+= 1
         for p in Page.objects.filter(category = c):
+            set_view_num(p, count)
+            count+= 1
             print(f' - {c} : {p}')
+            
 
 def add_page(cat, title, url, views=0):
     p = Page.objects.get_or_create(category = cat, title = title) [0]
@@ -65,24 +72,35 @@ def add_cat(name):
     return c
 
 
-def add_like(p):
-    if p.name == 'Python':
-        p.views = 128
-        p.likes = 64
-        p.save()
-    if p.name == 'Django':
-        p.views = 64
-        p.likes = 32
-        p.save()
-    if p.name == 'Other Frameworks':
-        p.views = 32
-        p.likes = 16
-        p.save()
-
 def add_view(name):
     c = Category.objects.get_or_create(name=name)[0]
     c.save()
     return c
+
+def set_like(c):
+    if c.name == 'Python':
+        c.views = 128
+        c.likes = 64
+        c.save()
+    if c.name == 'Django':
+        c.views = 64
+        c.likes = 32
+        c.save()
+    if c.name == 'Other Frameworks':
+        c.views = 32
+        c.likes = 16
+        c.save()
+
+
+def set_view_num(p,c):
+        p.views = (c*10)
+        p.likes = (c*20)
+        p.save()
+
+
+
+
+
 
 if __name__ == '__main__':
     print('Starting Rango population script...')
