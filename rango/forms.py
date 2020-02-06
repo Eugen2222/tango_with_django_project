@@ -3,10 +3,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from rango.models import Category
 from rango.models import Page
-from rango.forms import CategoryForm
-from rango.forms import PageForm
-from django.shortcuts import redirect
-from django.urls import reverse
+from django import forms
+
 
 def index(request):
 	category_list = Category.objects.order_by('-likes')[:5]
@@ -49,54 +47,28 @@ def show_page(request, page_name_slug):
 
 	return render(request, 'rango/page.html', context=context_dict)
 
+class CategoryForm(forms.ModelForm):
+	name = forms.CharField(max_length = 128, help_text="Please enter the category name.")
+	views = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
+	likes = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
+	slug = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-def add_category(request):
-	form = CategoryForm()
+	class Meta:
+		model = Category
+		fields = ('name',)
 
-	if request.method == 'POST':
-		form = CategoryForm(request.POST)
-		
-		if form.is_valid():
-
-			cat = form.save(commit = True)
-			print(cat, cat.slug)
-			return redirect('/rango/')
-
-		else:
-			print(form.errors)
-
-	return render(request, 'rango/add_category.html', {'form': form})
-
-
-def add_page(request, category_name_slug):
-	try:
-		category = Category.objects.get(slug=category_name_slug)
-	except Category.DoesNotExist:
-		category = None
+class PageForm(forms.ModelForm):
+	title = forms.CharField(max_length=128, help_text="Please enter the title of the page.")
+	url = forms.URLField(max_length=200, help_text="Please enter the URL of the page.")
+	views = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
 	
-	if category is None:
-		return redirect('/rango/')
-
-	form = PageForm()
-
-	if request.method == 'POST':
-		form = PageForm(request.POST)
-
-		if form.is_valid():
-			if category:
-				page = form.save(commit = False)
-				page.category=category
-				page.views = 0
-				page.save()
-
-			return redirect(reverse('rango:show_category', kwargs={'category_name_slug': category_name_slug}))
-
-		else:
-			print(form.errors)
-
-	context_dict = {'form':form, 'category':category}
-
-	return render(request, 'rango/add_page.html', context=context_dict)
-
-
-
+	class Meta:
+		model= Page
+		# What fields do we want to include in our form?
+	 	# This way we don't need every field in the model present.
+		# Some fields may allow NULL values; we may not want to include them.
+		# Here, we are hiding the foreign key.
+		#32  we can either exclude the category field from the form,
+		exclude = ('category',)
+		# or specify the fields to include (don't include the category field).
+		#fields = ('title', 'url', 'views')
