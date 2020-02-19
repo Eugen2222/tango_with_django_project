@@ -1,0 +1,11 @@
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
+{% if user.is_authenticated %}
+{% block title_block %}
+    Restricted Page
+{% endblock %}
+
+{% block body_block %}
+
+{% endblock %}
+{% endif %}

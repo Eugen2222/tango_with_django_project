@@ -67,6 +67,7 @@ ROOT_URLCONF = 'tango_with_django_project.urls'
 STATICFILES_DIRS = [STATIC_DIR, ]
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL ='/media/'
+LOGIN_URL ='rango:login'
 
 TEMPLATES = [
     {
